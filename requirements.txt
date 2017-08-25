@@ -1,0 +1,5 @@
+tqdm==4.15.0
+humanfriendly==4.4.1
+termcolor==1.1.0
+requests==2.18.4
+selenium==3.5.0
