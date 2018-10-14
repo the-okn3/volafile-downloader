@@ -7,6 +7,12 @@ max_allowed_size = 314572800
 download_output_dir = "../downloads"
 
 chat_log = True
+chat_messages_to_ignore = [
+    """Volafile can also be found here: https://twitter.com/volafile https://facebook.com/volafile"""
+]
+chat_nicks_to_ignore = [
+    "News"
+]
 
 # Archive will create and put the files in separated folders by date
 # note: the date that is created is the date the file was added, so if the
@@ -25,6 +31,9 @@ archive_date_format = "%Y-%m-%d"
 # Wait 60 seconds, Download everything in the room, and so on), note: each file
 # it's only downloaded if the file wasn't downloaded before
 download_loop_delay = 60
+
+# To start with the oldest files (that will expire first) first
+download_oldest_first = True
 
 # Extensions to not download
 extensions_blacklist = [".mp3", ".wav"]

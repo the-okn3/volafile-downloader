@@ -1,9 +1,10 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 __author__ = "Okn3"
 __email__ = "okn3@protonmail.com"
 __license__ = "MIT"
-__version__ = "2.0.0"
+__version__ = "2.1.0"
 
 import sys
 import config
@@ -74,7 +75,8 @@ def init_logger():
 
     # File Handler
     if config.logger_file_active:
-        logger_file_handler = logging.FileHandler(config.logger_file_path)
+        logger_file_handler = logging.FileHandler(
+            config.logger_file_path, encoding='utf8')
         logger_file_handler.setLevel(config.logger_file_level)
         logger_file_formatter = logging.Formatter(
             config.logger_file_format, datefmt=config.logger_file_date_format)

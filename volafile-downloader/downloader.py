@@ -66,15 +66,27 @@ class Downloader():
 
         self.initDriver()
 
-        while self.looping:
-            self.logger.info("Downloading room '%s'" % (self.room))
-            self.downloadFiles(False)
+        try:
+            while self.looping:
+                self.logger.info("Downloading room '%s'" % (self.room))
 
-            if self.chat_log:
-                self.downloadChatLog()
+                downloaded = self.downloadFiles(False)
 
-            self.logger.info("[Sleeping for %s seconds]" % (loop_delay))
+                if self.chat_log:
+                    self.downloadChatLog()
+
+                if not downloaded:
+                    time.sleep(int(loop_delay))
+                    self.logger.warning("Something went wrong, restarting...")
+                    return self.downloadLoop(loop_delay)
+
+                self.logger.info("[Sleeping for %s seconds]" % (loop_delay))
+                time.sleep(int(loop_delay))
+        except Exception:
+            self.closeDriver()
             time.sleep(int(loop_delay))
+            self.logger.warning("Something went wrong, restarting...")
+            return self.downloadLoop(loop_delay)
 
         self.closeDriver()
 
@@ -107,6 +119,7 @@ class Downloader():
 
             if close_driver:
                 self.closeDriver()
+
             return False
 
         file_index = 1
@@ -126,7 +139,7 @@ class Downloader():
 
         for f in files:
 
-            self.logger.info("[%s of %s] [%s] [%s] [%s] [%s] [by %s]" % (
+            self.logger.info(u"[%s of %s] [%s] [%s] [%s] [%s] [by %s]" % (
                 file_index,
                 info["total"],
                 f["name"],
@@ -298,17 +311,27 @@ class Downloader():
             owner = "♕" if "owner" in message["options"] else ""
 
             texts = []
+            stop = False
             for m in message["message"]:
+                text = str(m)
+
                 if m["type"] == "text":
-                    texts.append(m["value"])
+                    text = m["value"]
                 elif m["type"] == "file":
-                    texts.append("%s - %s (%s)" % (m["id"],
-                                                   m["name"],
-                                                   m["filetype"]))
+                    text = "%s - %s (%s)" % (m["id"],
+                                             m["name"],
+                                             m["filetype"])
                 elif m["type"] == "url":
-                    texts.append("%s (%s)" % (m["text"], m["href"]))
-                else:
-                    texts.append(str(m))
+                    text = "%s (%s)" % (m["text"], m["href"])
+
+                if text in config.chat_messages_to_ignore:
+                    stop = True
+                    continue
+
+                texts.append(text)
+
+            if (message["nick"] in config.chat_nicks_to_ignore) or stop:
+                continue
 
             with open(path, "a+", encoding="utf-8") as f:
                 f.write("%s%s: %s\n" % (
@@ -374,6 +397,9 @@ class Downloader():
                 "size": humanfriendly.parse_size(file_size),
                 "expiration": file_expiration
             })
+
+        if config.download_oldest_first:
+            files_list_output = files_list_output[::-1]
 
         return (Result.SUCCESS, files_list_output)
 
