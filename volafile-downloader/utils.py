@@ -1,10 +1,12 @@
 import os
 import re
 import config
+import requests
 
-from termcolor import colored
+from tqdm import tqdm
 from urllib.parse import unquote
 from os.path import splitext
+from datetime import datetime, timedelta
 
 
 def sanitize_file_name(file_name):
@@ -32,8 +34,8 @@ def log(log_type, path, file_info):
         output_path = os.path.join(path, "toobig.txt")
 
     else:
-        print(colored("[-] Error: Fix the god damn code, there is a log "
-                      "type that doesn't exist: " + log_type.upper(), "red"))
+        print("[-] Error: Fix the god damn code, there is a log "
+              "type that doesn't exist: " + log_type.upper())
         return
 
     if output_path:
@@ -75,3 +77,46 @@ def get_file_extension(file_name):
         if file_name.endswith(ext):
             return file_name[:-len(ext)], file_name[-len(ext):]
     return splitext(file_name) or ""
+
+
+def download_file(url, file_name=None):
+    """ Downloads a file from Volafile and shows a progress bar """
+
+    chunk_size = 1024
+
+    r = requests.get(url, stream=True, headers=config.headers,
+                     cookies=config.cookies)
+    r.raise_for_status()
+
+    if not r:
+        return False
+
+    total_size = int(r.headers.get("content-length", 0))
+
+    with open(file_name + ".part", "wb") as f:
+        for data in tqdm(iterable=r.iter_content(chunk_size=chunk_size),
+                         total=total_size / chunk_size, unit="KB",
+                         unit_scale=True):
+            f.write(data)
+
+    # Remove the ".part" from the file name
+    os.rename(file_name + ".part", file_name)
+
+
+def expiration_to_date(expiration):
+    expiration = expiration.lower().strip()
+    number, method = expiration.split(" ")
+    max_expiration_days = 2
+    date = datetime.now() + timedelta(days=-max_expiration_days)
+    number = int(number)
+
+    if method == "day" or method == "days":
+        return date + timedelta(days=+number)
+    elif method == "hour" or method == "hours":
+        return date + timedelta(hours=+number)
+    elif method == "min" or method == "mins":
+        return date + timedelta(minutes=+number)
+    elif method == "sec" or method == "secs":
+        return date + timedelta(seconds=+number)
+
+    return datetime.now()
