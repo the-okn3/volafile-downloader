@@ -67,4 +67,4 @@ ENV/
 *.log
 downloads/
 .vscode/
-drivers/chromedriver.exe
+**/drivers/chromedriver.exe
