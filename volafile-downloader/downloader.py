@@ -9,7 +9,8 @@ import humanfriendly
 
 from enum import Enum
 from utils import download_file, log, sanitize_file_name, prepare_url, \
-    get_file_id_and_name, get_file_extension, expiration_to_date
+    get_file_id_and_name, get_file_extension, expiration_to_date, \
+    log_file, get_logged_files
 from selenium import webdriver
 from selenium.webdriver.support import ui
 from selenium.common.exceptions import TimeoutException
@@ -60,6 +61,13 @@ class Downloader():
         self.logger.info("Room: %s" % (self.room))
         self.logger.info("Password: %s" % (self.password))
         self.logger.info("Archive: %s" % (self.archive))
+
+        # Create necessary directories
+        self.download_directory = os.path.join(self.output_dir, self.room)
+        if not os.path.exists(self.download_directory):
+            os.makedirs(self.download_directory)
+
+        self.downloaded_files = get_logged_files(self.download_directory)
 
     def downloadLoop(self, loop_delay=60):
         self.looping = True
@@ -129,13 +137,9 @@ class Downloader():
             already_exist=0,
             too_big=0,
             failed=0,
-            forbidden_extension=0
+            forbidden_extension=0,
+            user_ignored=0
         )
-
-        # Create necessary directories
-        download_directory = os.path.join(self.output_dir, self.room)
-        if not os.path.exists(download_directory):
-            os.makedirs(download_directory)
 
         for f in files:
 
@@ -149,7 +153,9 @@ class Downloader():
                 f["tag"]
             ))
 
-            download_directory_path = download_directory
+            download_directory_path = self.download_directory
+
+            file_id_name_log = ""
 
             # Change directory if it's to archive
             if self.archive:
@@ -160,22 +166,35 @@ class Downloader():
                         .strftime(config.archive_date_format)
 
                 download_directory_path = os.path.join(
-                    download_directory, archive_dir_name)
+                    self.download_directory, archive_dir_name)
+
+                file_id_name_log = archive_dir_name
 
             if not os.path.exists(download_directory_path):
                 os.makedirs(download_directory_path)
 
-            file_path = os.path.join(
-                download_directory_path,
-                f["name"] + " - " + str(f["id"]) + f["extension"]
-            )
+            file_id_name = f["name"] + " - " + str(f["id"]) + f["extension"]
+
+            if file_id_name_log == "":
+                file_id_name_log = file_id_name
+            else:
+                file_id_name_log = file_id_name_log + "/" + file_id_name
+
+            file_path = os.path.join(download_directory_path, file_id_name)
 
             file_index += 1
 
             # Check if the file already exists
-            if os.path.exists(file_path):
+            if os.path.exists(file_path) or \
+                    file_id_name_log in self.downloaded_files:
                 self.logger.info("File already exists")
                 info["already_exist"] += 1
+                continue
+
+            # Check if we can download a file from this user
+            if f["tag"].strip() in config.download_users_to_ignore:
+                self.logger.info("User ignored (from the list in the config)")
+                info["user_ignored"] += 1
                 continue
 
             # Check if the file extension is blacklisted
@@ -190,7 +209,7 @@ class Downloader():
                 self.logger.warning(
                     "File size not allowed to download")
                 if self.do_log:
-                    log("TOOBIG", download_directory_path, f)
+                    log("TOOBIG", self.download_directory, f)
                 info["too_big"] += 1
                 continue
 
@@ -198,14 +217,19 @@ class Downloader():
                 self.logger.info("Downloading...")
                 download_file(f["url"], file_path)
                 self.logger.info("Downloaded")
+
+                self.downloaded_files.append(file_id_name_log)
+                log_file(file_id_name_log, self.download_directory)
+
                 if self.do_log:
-                    log("ARCHIVE", download_directory_path, f)
+                    log("ARCHIVE", self.download_directory, f)
+
                 info["downloaded"] += 1
             except Exception as ex:
                 self.logger.error(
                     "Error downloading file:" + str(ex))
                 if self.do_log:
-                    log("ERROR", download_directory_path, f)
+                    log("ERROR", self.download_directory, f)
                 info["failed"] += 1
 
         self.logger.info("DONE")
@@ -221,6 +245,9 @@ class Downloader():
         self.logger.info("%s of %s Files couldn't be downloaded (error "
                          "downloading)" %
                          (info["failed"], info["total"]))
+        self.logger.info("%s of %s Files couldn't be downloaded (user "
+                         "ignored)" %
+                         (info["user_ignored"], info["total"]))
         return True
 
     def initDriver(self):

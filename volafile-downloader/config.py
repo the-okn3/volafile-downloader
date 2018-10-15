@@ -5,6 +5,9 @@
 max_allowed_size = 314572800
 
 download_output_dir = "../downloads"
+download_users_to_ignore = [
+    "ExampleNameHere2233"
+]
 
 chat_log = True
 chat_messages_to_ignore = [
@@ -33,7 +36,7 @@ archive_date_format = "%Y-%m-%d"
 download_loop_delay = 60
 
 # To start with the oldest files (that will expire first) first
-download_oldest_first = True
+download_oldest_first = False
 
 # Extensions to not download
 extensions_blacklist = [".mp3", ".wav"]
