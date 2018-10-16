@@ -84,16 +84,15 @@ class Downloader():
                     self.downloadChatLog()
 
                 if not downloaded:
-                    time.sleep(int(loop_delay))
-                    self.logger.warning("Something went wrong, restarting...")
-                    return self.downloadLoop(loop_delay)
+                    self.logger.info("There is no files to download")
 
                 self.logger.info("[Sleeping for %s seconds]" % (loop_delay))
                 time.sleep(int(loop_delay))
         except Exception:
             self.closeDriver()
-            time.sleep(int(loop_delay))
             self.logger.warning("Something went wrong, restarting...")
+            self.logger.info("[Sleeping for %s seconds]" % (loop_delay))
+            time.sleep(int(loop_delay))
             return self.downloadLoop(loop_delay)
 
         self.closeDriver()
@@ -112,7 +111,8 @@ class Downloader():
             result, files = self.getFilesList()
             if result == Result.ERROR:
                 self.logger.error("Error while trying to fetch the list "
-                                  "of files")
+                                  "of files, maybe there is no files "
+                                  "to download")
                 return False
 
             self.logger.info("List of files downloaded")
@@ -296,6 +296,8 @@ class Downloader():
             self.logger.info(
                 "Couldn't find the +18 warning modal, "
                 "assuming there isn't one...")
+        except Exception:
+            self.logger.info("Nothing to download")
 
     def downloadChatLog(self):
         self.logger.info("Downloading chat log...")

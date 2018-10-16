@@ -36,7 +36,7 @@ archive_date_format = "%Y-%m-%d"
 download_loop_delay = 60
 
 # To start with the oldest files (that will expire first) first
-download_oldest_first = False
+download_oldest_first = True
 
 # Extensions to not download
 extensions_blacklist = [".mp3", ".wav"]
