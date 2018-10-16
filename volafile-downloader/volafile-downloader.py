@@ -4,7 +4,7 @@
 __author__ = "Okn3"
 __email__ = "okn3@protonmail.com"
 __license__ = "MIT"
-__version__ = "2.1.0"
+__version__ = "2.2.0"
 
 import sys
 import config
