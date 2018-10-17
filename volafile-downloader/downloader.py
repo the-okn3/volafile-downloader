@@ -155,8 +155,6 @@ class Downloader():
 
             download_directory_path = self.download_directory
 
-            file_id_name_log = ""
-
             # Change directory if it's to archive
             if self.archive:
                 archive_dir_name = datetime.now().strftime(config.archive_date_format)
@@ -168,17 +166,10 @@ class Downloader():
                 download_directory_path = os.path.join(
                     self.download_directory, archive_dir_name)
 
-                file_id_name_log = archive_dir_name
-
             if not os.path.exists(download_directory_path):
                 os.makedirs(download_directory_path)
 
             file_id_name = f["name"] + " - " + str(f["id"]) + f["extension"]
-
-            if file_id_name_log == "":
-                file_id_name_log = file_id_name
-            else:
-                file_id_name_log = file_id_name_log + "/" + file_id_name
 
             file_path = os.path.join(download_directory_path, file_id_name)
 
@@ -186,7 +177,7 @@ class Downloader():
 
             # Check if the file already exists
             if os.path.exists(file_path) or \
-                    file_id_name_log in self.downloaded_files:
+                    file_id_name in self.downloaded_files:
                 self.logger.info("File already exists")
                 info["already_exist"] += 1
                 continue
@@ -218,8 +209,8 @@ class Downloader():
                 download_file(f["url"], file_path)
                 self.logger.info("Downloaded")
 
-                self.downloaded_files.append(file_id_name_log)
-                log_file(file_id_name_log, self.download_directory)
+                self.downloaded_files.append(file_id_name)
+                log_file(file_id_name, self.download_directory)
 
                 if self.do_log:
                     log("ARCHIVE", self.download_directory, f)

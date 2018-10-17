@@ -62,7 +62,7 @@ def get_logged_files(path):
 
     with open(output_path, "r", encoding="utf-8") as f:
         # splitlines will remove the '\n' in the end and return a list of line.
-        return set(f.read().splitlines())
+        return list(set(f.read().splitlines()))
     return []
 
 
