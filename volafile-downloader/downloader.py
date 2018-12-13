@@ -195,6 +195,13 @@ class Downloader():
                 info["forbidden_extension"] += 1
                 continue
 
+            # Check if the file name is blacklisted
+            if f["name"] + f["extension"] in config.filenames_blacklist:
+                self.logger.warning(
+                    "File Name not allowed to download")
+                info["forbidden_extension"] += 1
+                continue
+
             # Check if the file size is greater then allowed
             if f["size"] > self.max_allowed_size:
                 self.logger.warning(
@@ -230,7 +237,7 @@ class Downloader():
                          (info["already_exist"], info["total"]))
         self.logger.info("%s of %s Files were too big to download" %
                          (info["too_big"], info["total"]))
-        self.logger.info("%s of %s Files have extensions not allowed to "
+        self.logger.info("%s of %s Files have extensions or name not allowed to "
                          "download" %
                          (info["forbidden_extension"], info["total"]))
         self.logger.info("%s of %s Files couldn't be downloaded (error "

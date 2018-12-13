@@ -2,7 +2,7 @@
 
 # Download
 # The size is in bytes, 314572800 = 300MB
-max_allowed_size = 314572800
+max_allowed_size = 800572800
 
 download_output_dir = "../downloads"
 download_users_to_ignore = [
@@ -40,6 +40,10 @@ download_oldest_first = True
 
 # Extensions to not download
 extensions_blacklist = [".mp3", ".wav"]
+
+filenames_blacklist = [
+    "donotdownloadme_lalalalalalalalalal.jpg"
+]
 
 # This can be edited or removed, the only thing needed is the user-agent
 headers = {
