@@ -27,25 +27,25 @@ If you are using **Linux**, **MacOS**, **other OS** or you have the chrome drive
 Download all files from a room:
 
 ```
-λ python download.py -r roomname
+λ python volafile-downloader.py -r roomname
 ```
 
 And with a password
 
 ```
-λ python download.py -r roomname -p 123456
+λ python volafile-downloader.py -r roomname -p 123456
 ```
 
 Download all files from a room and loops to check if new files were added (you can also change the time delay between the loop with the **-ld** option):
 
 ```
-λ python download.py -r roomname -l
+λ python volafile-downloader.py -r roomname -l
 ```
 
 Download all files from a room and loops to check if new files were added and also downloads the chat logs (The download of chat logs only work with the download loop (-l argument), check the FAQ for more information)
 
 ```
-λ python download.py -r roomname -l -cl
+λ python volafile-downloader.py -r roomname -l -cl
 ```
 
 Download all files from a room with password and loops to check if new files were added and archives the files by creation date:
@@ -60,14 +60,14 @@ Download all files from a room with password and loops to check if new files wer
 ```
 
 ```
-λ python download.py -r roomname -p 123456 -l -a -at CREATION_DATE -cl
+λ python volafile-downloader.py -r roomname -p 123456 -l -a -at CREATION_DATE -cl
 ```
 
 Show all the available options:  
 Note: Some options/arguments will override some config variables.
 
 ```
-λ python download.py -h
+λ python volafile-downloader.py -h
 usage: volafile-downloader.py [-h] [-o OUTPUT_DIR] [-l] [-p PASSWORD] [-a]
                               [-at ARCHIVE_TYPE] [-cl] [-ld LOOP_DELAY]
                               [-ms MAX_ALLOWED_SIZE] [-nl] -r ROOM
